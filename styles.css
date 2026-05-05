@@ -1,0 +1,792 @@
+/* --- WinUI 3 (Windows 11) Design System Variables --- */
+:root {
+    /* Fluent Typography */
+    --font-family: "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    --font-display: "Segoe UI Variable Display", "Segoe UI Variable", "Segoe UI", -apple-system, sans-serif;
+
+    /* Light Theme Colors (Default) */
+    --layer-bg: #F3F3F3;
+    /* Solid fallback for Mica */
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --card-border: rgba(0, 0, 0, 0.06);
+    --text-primary: rgba(0, 0, 0, 0.895);
+    --text-secondary: rgba(0, 0, 0, 0.605);
+    --text-tertiary: rgba(0, 0, 0, 0.45);
+
+    --accent-default: #005FB8;
+    --accent-secondary: #0050A0;
+    --accent-tertiary: #004285;
+
+    --control-fill: rgba(255, 255, 255, 0.7);
+    --control-stroke: rgba(0, 0, 0, 0.06);
+    --control-stroke-bottom: rgba(0, 0, 0, 0.16);
+    --control-hover: rgba(249, 249, 249, 0.5);
+    --control-active: rgba(249, 249, 249, 0.3);
+
+    --primary-btn-fg: #FFFFFF;
+    --primary-btn-hover: rgba(255, 255, 255, 0.1);
+
+    --track-fill: rgba(0, 0, 0, 0.2);
+    --orb-bg-empty: rgba(255, 255, 255, 0.5);
+    --orb-bg-filled: rgba(0, 95, 184, 0.06);
+
+    --easing: cubic-bezier(0.1, 0.9, 0.2, 1);
+    --duration-fast: 167ms;
+
+    --dropdown-bg: rgba(255, 255, 255, 0.95);
+}
+
+[data-theme="dark"] {
+    /* Dark Theme Colors */
+    --layer-bg: #202020;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --text-primary: #FFFFFF;
+    --text-secondary: rgba(255, 255, 255, 0.78);
+    --text-tertiary: rgba(255, 255, 255, 0.53);
+
+    --accent-default: #60CDFF;
+    --accent-secondary: #58BFED;
+    --accent-tertiary: #50B0D9;
+
+    --control-fill: rgba(255, 255, 255, 0.06);
+    --control-stroke: rgba(255, 255, 255, 0.09);
+    --control-stroke-bottom: rgba(255, 255, 255, 0.09);
+    /* Flatter in dark mode */
+    --control-hover: rgba(255, 255, 255, 0.08);
+    --control-active: rgba(255, 255, 255, 0.03);
+
+    --primary-btn-fg: #000000;
+    --primary-btn-hover: rgba(0, 0, 0, 0.1);
+
+    --track-fill: rgba(255, 255, 255, 0.2);
+    --orb-bg-empty: rgba(0, 0, 0, 0.2);
+    --orb-bg-filled: rgba(96, 205, 255, 0.1);
+
+    --dropdown-bg: rgba(32, 32, 32, 0.95);
+}
+
+/* --- Base Resets & Layout --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--layer-bg);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: background-color var(--duration-fast), color var(--duration-fast);
+}
+
+/* --- WinUI Typography --- */
+h1 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 36px;
+}
+
+h2 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 28px;
+    margin-bottom: 16px;
+}
+
+.body-text {
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--text-secondary);
+}
+
+.caption-text {
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--text-tertiary);
+    margin-top: 16px;
+}
+
+.accent-text {
+    color: var(--accent-default);
+    font-weight: 600;
+}
+
+/* --- App Header (Title Bar style) --- */
+.fluent-header {
+    padding: 32px 32px 12px 32px;
+}
+
+.header-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 16px;
+}
+
+.header-title-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.app-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--accent-default);
+}
+
+/* --- Main Layout --- */
+.app-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 32px 32px 32px;
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 24px;
+    flex-grow: 1;
+}
+
+@media (max-width: 950px) {
+    .app-content {
+        grid-template-columns: 1fr;
+    }
+
+    .fluent-header {
+        padding: 24px 24px 8px 24px;
+    }
+
+    .app-content {
+        padding: 0 24px 24px 24px;
+    }
+}
+
+.panel-left,
+.panel-right {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* --- Fluent Cards (Layering) --- */
+.fluent-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    backdrop-filter: blur(10px);
+    transition: background var(--duration-fast) var(--easing), border var(--duration-fast) var(--easing);
+}
+
+.grid-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+    overflow-x: auto;
+}
+
+/* --- Element Info --- */
+.element-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.element-symbol {
+    width: 64px;
+    height: 64px;
+    background: var(--accent-default);
+    color: var(--primary-btn-fg);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 600;
+    font-family: var(--font-display);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.element-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.element-atomic {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* --- Controls: Fluent Slider --- */
+.slider-container {
+    margin-bottom: 24px;
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.fluent-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 24px;
+    background: transparent;
+    outline: none;
+    cursor: pointer;
+    --slider-fill: 0%;
+}
+
+.fluent-slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, var(--accent-default) var(--slider-fill), var(--track-fill) var(--slider-fill));
+    border-radius: 2px;
+}
+
+.fluent-slider::-moz-range-track {
+    width: 100%;
+    height: 4px;
+    background: var(--track-fill);
+    border-radius: 2px;
+}
+
+.fluent-slider::-moz-range-progress {
+    background: var(--accent-default);
+    height: 4px;
+    border-radius: 2px;
+}
+
+.fluent-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: var(--accent-default);
+    border: 4px solid rgb(55, 55, 55);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    margin-top: -8px;
+    transition: transform var(--duration-fast) var(--easing), border-width 0.1s;
+}
+
+.fluent-slider:hover::-webkit-slider-thumb {
+    transform: scale(1.1);
+}
+
+.fluent-slider:active::-webkit-slider-thumb {
+    transform: scale(0.9);
+    border-width: 6px;
+}
+
+/* --- Controls: Fluent Buttons --- */
+.button-group {
+    display: flex;
+    gap: 8px;
+}
+
+.fluent-btn {
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 500;
+    height: 32px;
+    padding: 0 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--easing);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fluent-btn.standard {
+    background: var(--control-fill);
+    color: var(--text-primary);
+    border: 1px solid var(--control-stroke);
+    border-bottom-color: var(--control-stroke-bottom);
+}
+
+.fluent-btn.standard:hover {
+    background: var(--control-hover);
+}
+
+.fluent-btn.standard:active {
+    background: var(--control-active);
+    color: var(--text-secondary);
+    border-bottom-color: var(--control-stroke);
+}
+
+.fluent-btn.primary {
+    background: var(--accent-default);
+    color: var(--primary-btn-fg);
+    border: 1px solid transparent;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    flex-grow: 1;
+}
+
+.fluent-btn.primary:hover {
+    background: var(--accent-secondary);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.fluent-btn.primary:active {
+    background: var(--accent-tertiary);
+    color: rgba(255, 255, 255, 0.7);
+    box-shadow: none;
+}
+
+/* --- Controls: Fluent Toggle Switch --- */
+.fluent-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+}
+
+.toggle-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.toggle-switch {
+    width: 40px;
+    height: 20px;
+    border-radius: 10px;
+    background: var(--control-fill);
+    border: 1px solid var(--text-secondary);
+    position: relative;
+    transition: background var(--duration-fast), border var(--duration-fast);
+}
+
+.toggle-thumb {
+    width: 12px;
+    height: 12px;
+    background: var(--text-secondary);
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: all var(--duration-fast) var(--easing);
+}
+
+.fluent-toggle:hover .toggle-thumb {
+    width: 14px;
+    height: 14px;
+    top: 2px;
+    left: 2px;
+    background: var(--text-primary);
+}
+
+.fluent-toggle[aria-checked="true"] .toggle-switch {
+    background: var(--accent-default);
+    border-color: var(--accent-default);
+}
+
+.fluent-toggle[aria-checked="true"] .toggle-thumb {
+    background: var(--primary-btn-fg);
+    left: calc(100% - 15px);
+}
+
+.fluent-toggle[aria-checked="true"]:hover .toggle-thumb {
+    left: calc(100% - 16px);
+}
+
+/* --- Electron Configuration Tags --- */
+.config-text {
+    font-family: var(--font-family);
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.placeholder-text {
+    color: var(--text-tertiary);
+    font-style: italic;
+}
+
+.config-tag {
+    background: var(--control-fill);
+    border: 1px solid var(--control-stroke);
+    color: var(--text-primary);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    animation: fluentFadeIn 0.2s var(--easing) forwards;
+}
+
+.config-tag.active {
+    background: var(--accent-default);
+    color: var(--primary-btn-fg);
+    border-color: transparent;
+}
+
+/* --- Grid Diagram --- */
+.diagram {
+    display: grid;
+    grid-template-columns: 40px repeat(4, 72px);
+    grid-template-rows: 30px repeat(7, 72px);
+    gap: 8px;
+    position: relative;
+}
+
+@media (min-width: 1100px) {
+    .diagram {
+        grid-template-columns: 50px repeat(4, 80px);
+        grid-template-rows: 40px repeat(7, 80px);
+        gap: 12px;
+    }
+}
+
+.grid-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.row-header {
+    justify-content: flex-end;
+    padding-right: 12px;
+}
+
+/* Orbital Items (WinUI Grid Items) */
+.orbital {
+    background: var(--orb-bg-empty);
+    border: 1px solid transparent;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    transition: all var(--duration-fast) var(--easing);
+}
+
+.order-badge {
+    position: absolute;
+    top: 4px;
+    left: 6px;
+    font-size: 10px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+}
+
+.orb-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 4px;
+}
+
+.orb-count {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* Fluent Inner Progress Bar */
+.progress-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: transparent;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background-color: var(--accent-default);
+    border-radius: 0 4px 0 0;
+    transition: width var(--duration-fast) ease-out;
+}
+
+/* Orbital States */
+.orbital.filling {
+    border-color: var(--accent-default);
+    background: var(--orb-bg-empty);
+    transform: scale(1.02);
+}
+
+.orbital.filled {
+    border-color: transparent;
+    background: var(--orb-bg-filled);
+}
+
+.orbital.filled .orb-name {
+    color: var(--accent-default);
+}
+
+.orbital.filled .progress-bar {
+    border-radius: 0;
+}
+
+/* Animations */
+@keyframes fluentFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- Controls: Manual Input Field --- */
+.slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.fluent-input {
+    width: 60px;
+    height: 32px;
+    padding: 4px 8px;
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 4px;
+    border: 1px solid var(--control-stroke);
+    border-bottom-color: var(--control-stroke-bottom);
+    background: var(--control-fill);
+    color: var(--text-primary);
+    outline: none;
+    transition: all var(--duration-fast) var(--easing);
+    text-align: center;
+}
+
+/* WinUI Input Focus State */
+.fluent-input:focus {
+    border-bottom-color: var(--accent-default);
+    border-bottom-width: 2px;
+    padding-bottom: 3px;
+    /* Prevents text shifting */
+}
+
+/* Hide default browser up/down arrows for the number input */
+.fluent-input::-webkit-outer-spin-button,
+.fluent-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.fluent-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* --- Element Search Bar --- */
+.card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: relative;
+    z-index: 10;
+}
+
+.card-header-row .card-title {
+    margin-bottom: 0;
+
+}
+
+.search-box {
+    flex-grow: 1;
+    max-width: 200px;
+    margin-left: auto;
+    position: relative;
+    z-index: 101;
+}
+
+/* Overriding the text-align center applied to the number input */
+.search-box .fluent-input {
+    width: 100%;
+    text-align: left;
+}
+
+.element-header,
+.slider-header,
+.slider-container,
+.button-group,
+.config-card,
+.config-text {
+    position: relative;
+    z-index: 1;
+}
+
+/* Overriding the text-align center applied to the number input */
+.search-box .fluent-input {
+    width: 100%;
+    text-align: left;
+}
+
+.fluent-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+
+    /* Use the high-opacity variable we created */
+    background: var(--dropdown-bg);
+
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    /* The blur helps it feel premium, but the background color 
+       now does the heavy lifting of hiding text behind it */
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    /* Increased shadow for depth */
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 999;
+    /* Extremely high to ensure it stays on top of the search-box */
+    list-style: none;
+    padding: 4px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.fluent-dropdown.hidden {
+    display: none;
+}
+
+.dropdown-item {
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dropdown-item:hover {
+    background: var(--control-hover);
+}
+
+.dropdown-item:active {
+    background: var(--control-active);
+}
+
+.dropdown-symbol {
+    font-weight: 600;
+    color: var(--accent-default);
+    width: 24px;
+}
+
+.dropdown-name {
+    color: var(--text-primary);
+}
+
+/* WinUI thin scrollbar for the dropdown */
+.fluent-dropdown::-webkit-scrollbar {
+    width: 4px;
+}
+
+.fluent-dropdown::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.fluent-dropdown::-webkit-scrollbar-thumb {
+    background: var(--text-tertiary);
+    border-radius: 4px;
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 480px) {
+
+    /* Stack header items for narrow screens */
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .fluent-header {
+        padding: 24px 16px 8px 16px;
+    }
+
+    .app-content {
+        padding: 0 16px 16px 16px;
+        gap: 16px;
+    }
+
+    .fluent-card {
+        padding: 16px;
+    }
+
+    /* Shrink Element Info Header */
+    .element-symbol {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+
+    .search-box {
+        max-width: 100%;
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .element-name {
+        font-size: 18px;
+    }
+
+    /* Scale down the entire Grid Diagram to fit mobile screens */
+    .diagram {
+        grid-template-columns: 24px repeat(4, 60px);
+        grid-template-rows: 24px repeat(7, 60px);
+        gap: 4px;
+    }
+
+    .grid-header {
+        font-size: 12px;
+    }
+
+    .orb-name {
+        font-size: 14px;
+    }
+
+    .orb-count {
+        font-size: 10px;
+    }
+
+    .order-badge {
+        font-size: 9px;
+        top: 2px;
+        left: 4px;
+    }
+}
