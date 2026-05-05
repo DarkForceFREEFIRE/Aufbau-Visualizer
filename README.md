@@ -12,7 +12,7 @@ An interactive, web-based educational tool that visualizes the electron configur
 - **Zero Dependencies:** Built entirely with vanilla HTML, CSS, and JavaScript. No build steps, bundlers, or external libraries required.
 
 
-[**Try the Visualizer Here**]([https://your-username.github.io/aufbau-visualizer](https://darkforcefreefire.github.io/Aufbau-Visualizer/))
+**[Try the Visualizer Here](https://darkforcefreefire.github.io/Aufbau-Visualizer/)**
 
 ## 📸 Preview
 
