@@ -165,7 +165,6 @@ h2 {
 
     .panel-right {
         grid-column: 1 / -1;
-        /* Diagram pushes to full width below controls */
     }
 
     .atom-card {
@@ -196,7 +195,7 @@ h2 {
 }
 
 .panel-middle {
-    min-width: 300px;
+    min-width: 250px;
 }
 
 /* --- Fluent Cards (Layering) --- */
@@ -218,7 +217,7 @@ h2 {
     overflow-x: auto;
 }
 
-/* --- Bohr Model Visualizer (NEW) --- */
+/* --- Bohr Model Visualizer --- */
 .atom-card {
     display: flex;
     flex-direction: column;
@@ -230,6 +229,8 @@ h2 {
 #canvas-container {
     flex-grow: 1;
     width: 100%;
+    height: 100%;
+    min-height: 300px;
     position: relative;
 }
 
@@ -531,7 +532,7 @@ canvas {
     justify-content: center;
     position: relative;
     overflow: hidden;
-    transition: all var(--duration-fast) var(--easing);
+    transition: all 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
 }
 
 .order-badge {
@@ -743,16 +744,119 @@ canvas {
     border-radius: 4px;
 }
 
-/* --- Mobile Responsiveness --- */
+.fluent-checkbox-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    margin: 10px 0;
+}
+
+/* Hide the actual input but keep it functional */
+.fluent-checkbox-input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* The custom box */
+.fluent-checkbox-box {
+    height: 20px;
+    width: 20px;
+    background: var(--control-fill);
+    border: 1px solid var(--control-stroke);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s var(--easing);
+    margin-right: 10px;
+}
+
+/* The Checkmark (SVG) */
+.fluent-checkmark {
+    width: 12px;
+    height: 12px;
+    color: transparent;
+    /* Hide by default */
+    transition: color 0.2s ease;
+}
+
+/* Checkbox Hover State */
+.fluent-checkbox-container:hover .fluent-checkbox-box {
+    background: var(--control-hover);
+    border-color: var(--text-secondary);
+}
+
+/* CHECKED STATE: Using your color-mix logic style */
+.fluent-checkbox-input:checked+.fluent-checkbox-label .fluent-checkbox-box {
+    background: var(--accent-default);
+    border-color: var(--accent-default);
+}
+
+.fluent-checkbox-input:checked+.fluent-checkbox-label .fluent-checkmark {
+    color: var(--primary-btn-fg);
+    /* White check on blue box */
+}
+
+/* Focus state for accessibility */
+.fluent-checkbox-input:focus-visible+.fluent-checkbox-label .fluent-checkbox-box {
+    outline: 2px solid var(--accent-default);
+    outline-offset: 2px;
+}
+
+.checkbox-text {
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--text-tertiary);
+
+    border: 3px solid transparent;
+    background-clip: content-box;
+
+    border-radius: 10px;
+}
+
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-secondary);
+    border: 3px solid transparent;
+    background-clip: content-box;
+}
+
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-tertiary) transparent;
+}
+
 @media (max-width: 480px) {
     .header-content {
         flex-direction: column;
         align-items: flex-start;
-        gap: 16px;
+        gap: 12px;
+    }
+
+    .header-titles h1 {
+        font-size: 22px;
     }
 
     .fluent-header {
-        padding: 24px 16px 8px 16px;
+        padding: 16px 16px 8px 16px;
     }
 
     .app-content {
@@ -770,6 +874,12 @@ canvas {
         font-size: 20px;
     }
 
+    .card-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
     .search-box {
         max-width: 100%;
         width: 100%;
@@ -778,6 +888,18 @@ canvas {
 
     .element-name {
         font-size: 18px;
+    }
+
+    .slider-header {
+        gap: 8px;
+    }
+
+    .atom-card {
+        min-height: 300px;
+    }
+
+    #canvas-container {
+        min-height: 250px;
     }
 
     .diagram {

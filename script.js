@@ -86,7 +86,10 @@ const btnReset = document.getElementById('btn-reset');
 const themeToggle = document.getElementById('theme-toggle');
 const searchInput = document.getElementById('element-search');
 const searchDropdown = document.getElementById('search-dropdown');
+const realismToggle = document.getElementById('realism-toggle');
 
+
+let isRealismEnabled = false;
 let autoplayInterval;
 let currentShellCounts = [0, 0, 0, 0, 0, 0, 0];
 let currentSymbol = "--";
@@ -96,7 +99,6 @@ function initTheme() {
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
-
     setTheme(isDark);
 }
 
@@ -104,8 +106,6 @@ function setTheme(isDark) {
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
     themeToggle.setAttribute('aria-checked', isDark);
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
-
-    // Update canvas visualizer colors to match the theme shortly after switch
     setTimeout(updateCanvasColors, 50);
 }
 
@@ -124,7 +124,6 @@ themeToggle.addEventListener('keydown', (e) => {
 
 // --- Generate Diagram Grid ---
 function buildGrid() {
-    // Column Headers (s, p, d, f)
     const cols = ['s', 'p', 'd', 'f'];
     cols.forEach((col, i) => {
         let label = document.createElement('div');
@@ -135,7 +134,6 @@ function buildGrid() {
         diagram.appendChild(label);
     });
 
-    // Row Headers (n=1 to 7)
     for (let n = 1; n <= 7; n++) {
         let label = document.createElement('div');
         label.className = 'grid-header row-header';
@@ -145,12 +143,10 @@ function buildGrid() {
         diagram.appendChild(label);
     }
 
-    // Orbital Boxes
     orbitals.forEach((orb, index) => {
         const div = document.createElement('div');
         div.className = 'orbital empty';
         div.id = `orb-${orb.id}`;
-        // Map grid position based on quantum numbers (n=row, l=column offset)
         div.style.gridRow = orb.n + 1;
         div.style.gridColumn = orb.l + 2;
 
@@ -169,20 +165,12 @@ function updateConfig(source = 'system') {
     let remaining = count;
     let configHTML = "";
 
-    // Keep the number input field synchronized
-    if (source !== 'manual_input') {
-        numInput.value = count;
-    }
-    // Clear search input when navigating via other methods
-    if (source !== 'search') {
-        searchInput.value = '';
-    }
+    if (source !== 'manual_input') numInput.value = count;
+    if (source !== 'search') searchInput.value = '';
 
-    // Update Slider UI Fill progress 
     const percent = (count / slider.max) * 100;
     slider.style.setProperty('--slider-fill', `${percent}%`);
 
-    // Update Element Information Display
     if (count === 0) {
         currentSymbol = "--";
         elSymbol.innerText = "--";
@@ -200,10 +188,8 @@ function updateConfig(source = 'system') {
         elDesc.innerText = getElementCategoryAndDescription(count, name);
     }
 
-    // Reset shell counts for canvas
     currentShellCounts = [0, 0, 0, 0, 0, 0, 0];
 
-    // Update Grid & Build Config String
     orbitals.forEach((orb) => {
         const orbDiv = document.getElementById(`orb-${orb.id}`);
         const progBar = document.getElementById(`prog-${orb.id}`);
@@ -212,11 +198,8 @@ function updateConfig(source = 'system') {
         if (remaining > 0) {
             let adding = Math.min(remaining, orb.max);
             remaining -= adding;
-
-            // Log shell additions for Atom visualizer (n=1 maps to index 0)
             currentShellCounts[orb.n - 1] += adding;
 
-            // Update box metrics
             countText.innerText = `${adding}/${orb.max}`;
             progBar.style.width = `${(adding / orb.max) * 100}%`;
 
@@ -228,7 +211,6 @@ function updateConfig(source = 'system') {
                 configHTML += `<span class="config-tag active">${orb.id}<sup>${adding}</sup></span>`;
             }
         } else {
-            // Reset state
             countText.innerText = `0/${orb.max}`;
             progBar.style.width = `0%`;
             orbDiv.className = 'orbital empty';
@@ -238,7 +220,11 @@ function updateConfig(source = 'system') {
     if (count > 0) configText.innerHTML = configHTML;
 }
 
-// --- Canvas Atom Visualizer ---
+
+realismToggle.addEventListener('change', (e) => {
+    isRealismEnabled = e.target.checked;
+});
+
 const canvas = document.getElementById('atom-canvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
 let logicalWidth = 300;
@@ -261,7 +247,8 @@ function updateCanvasColors() {
 
 function resizeCanvas() {
     const container = document.getElementById('canvas-container');
-    if (!container || !canvas) return;
+    if (!container || !canvas || !ctx) return;
+
     const rect = container.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
 
@@ -271,7 +258,9 @@ function resizeCanvas() {
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
 
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
+
     canvas.style.width = `${rect.width}px`;
     canvas.style.height = `${rect.height}px`;
 }
@@ -283,15 +272,38 @@ function drawAtom(time) {
     const cx = logicalWidth / 2;
     const cy = logicalHeight / 2;
 
-    const maxR = Math.min(cx, cy) - 20;
-    const ringSpacing = maxR / 7;
+    const currentZ = parseInt(slider.value) || 0;
+    const nucleusRadius = 18;
+    const maxCanvasRadius = Math.min(cx, cy) - 20;
+
+    // --- NEW RADIUS LOGIC ---
+    let shellRadii = [];
+
+    if (isRealismEnabled) {
+        // REALISM MODE: Progressive gaps + Compression
+        const compression = 1.0 - (currentZ / 118) * 0.1;
+        const maxAvailableR = maxCanvasRadius * compression;
+        const safeStartR = nucleusRadius + 16;
+        const availableSpace = Math.max(maxAvailableR - safeStartR, 50);
+        const cumulativeProportions = [0.20, 0.40, 0.54, 0.74, 0.88, 0.98, 1.05];
+
+        for (let n = 1; n <= 7; n++) {
+            shellRadii.push(safeStartR + (availableSpace * cumulativeProportions[n - 1]));
+        }
+    } else {
+        // CLEAN MODE: Uniform fixed gaps
+        const ringSpacing = maxCanvasRadius / 7;
+        for (let n = 1; n <= 7; n++) {
+            shellRadii.push(ringSpacing * n);
+        }
+    }
 
     // Draw Rings
     ctx.lineWidth = 1;
     for (let n = 1; n <= 7; n++) {
         if (currentShellCounts[n - 1] > 0) {
             ctx.beginPath();
-            ctx.arc(cx, cy, ringSpacing * n, 0, 2 * Math.PI);
+            ctx.arc(cx, cy, shellRadii[n - 1], 0, 2 * Math.PI); // Use the calculated radii
             ctx.strokeStyle = cachedColors.ring;
             ctx.stroke();
         }
@@ -301,8 +313,7 @@ function drawAtom(time) {
     for (let n = 1; n <= 7; n++) {
         const count = currentShellCounts[n - 1];
         if (count > 0) {
-            const r = ringSpacing * n;
-            // Inner rings orbit slightly faster
+            const r = shellRadii[n - 1]; // Use the calculated radii
             const speed = 0.0008 / n;
             for (let i = 0; i < count; i++) {
                 const angle = (time * speed) + ((Math.PI * 2) / count) * i;
@@ -310,11 +321,9 @@ function drawAtom(time) {
                 const y = cy + Math.sin(angle) * r;
 
                 ctx.beginPath();
-                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                ctx.arc(x, y, Math.max(2.5, Math.min(4, logicalWidth / 100)), 0, 2 * Math.PI);
                 ctx.fillStyle = cachedColors.accent;
                 ctx.fill();
-
-                // Outline electron
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = cachedColors.btnFg;
                 ctx.stroke();
@@ -325,19 +334,18 @@ function drawAtom(time) {
     // Draw Nucleus
     if (currentSymbol !== "--") {
         ctx.beginPath();
-        ctx.arc(cx, cy, 18, 0, 2 * Math.PI);
+        ctx.arc(cx, cy, nucleusRadius, 0, 2 * Math.PI);
         ctx.fillStyle = cachedColors.accent;
         ctx.fill();
 
         ctx.fillStyle = cachedColors.btnFg;
-        ctx.font = 'bold 14px "Segoe UI Variable Text", sans-serif';
+        ctx.font = 'bold 16px "Segoe UI Variable Text", sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(currentSymbol, cx, cy + 1);
     } else {
-        // Empty State
         ctx.beginPath();
-        ctx.arc(cx, cy, 18, 0, 2 * Math.PI);
+        ctx.arc(cx, cy, nucleusRadius, 0, 2 * Math.PI);
         ctx.fillStyle = cachedColors.ring;
         ctx.fill();
     }
@@ -411,10 +419,6 @@ btnPlay.addEventListener('click', () => {
 });
 
 // --- Custom Search Logic ---
-function populateSearchData() {
-    // Kept here in case you need initial indexation map
-}
-
 function renderDropdown(query) {
     searchDropdown.innerHTML = '';
 
