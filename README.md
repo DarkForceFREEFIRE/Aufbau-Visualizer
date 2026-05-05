@@ -11,9 +11,7 @@ An interactive, web-based educational tool that visualizes the electron configur
 - **Auto-Play Simulation:** Sit back and watch the app automatically build elements from Hydrogen to Oganesson.
 - **Zero Dependencies:** Built entirely with vanilla HTML, CSS, and JavaScript. No build steps, bundlers, or external libraries required.
 
-## 🚀 Live Demo
 
-*(Optional: Add a link to your live hosted project here, e.g., GitHub Pages or Vercel)*  
 [**Try the Visualizer Here**]([https://your-username.github.io/aufbau-visualizer](https://darkforcefreefire.github.io/Aufbau-Visualizer/))
 
 ## 📸 Preview
