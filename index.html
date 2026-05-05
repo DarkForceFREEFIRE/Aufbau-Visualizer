@@ -37,11 +37,9 @@
         <div class="panel-left">
             <!-- Element Info Card -->
             <section class="fluent-card">
-                <!-- NEW: Search Header -->
                 <div class="card-header-row">
                     <h2 class="card-title">Element Details</h2>
                     <div class="search-box">
-                        <!-- Changed type to "text" and removed the "list" attribute. Added autocomplete="off" -->
                         <input type="text" id="element-search" class="fluent-input" placeholder="Search element..."
                             aria-label="Search Element by Name or Symbol" autocomplete="off">
                         <ul id="search-dropdown" class="fluent-dropdown hidden"></ul>
@@ -63,14 +61,11 @@
             <!-- Controls Card -->
             <section class="fluent-card">
                 <h2 class="card-title">Simulation Controls</h2>
-
-                <!-- NEW: Manual Input Field -->
                 <div class="slider-header">
                     <label for="electron-input" class="body-text">Electron Count:</label>
                     <input type="number" id="electron-input" class="fluent-input" min="0" max="118" value="0"
                         aria-label="Manual Electron Count">
                 </div>
-
                 <div class="slider-container">
                     <input type="range" id="electron-slider" class="fluent-slider" min="0" max="118" value="0"
                         aria-label="Electron Count Slider">
@@ -92,9 +87,19 @@
                     <span class="placeholder-text">Waiting for electrons...</span>
                 </div>
                 <p class="caption-text">
-                    Note: Visualizes standard standard Aufbau filling. Real-world exceptions (e.g., Cu, Cr) are omitted
+                    Note: Visualizes standard Aufbau filling. Real-world exceptions (e.g., Cu, Cr) are omitted
                     to preserve the sequence.
                 </p>
+            </section>
+        </div>
+
+        <!-- Middle Column: Bohr Model Visualizer (NEW) -->
+        <div class="panel-middle">
+            <section class="fluent-card atom-card">
+                <h2 class="card-title">Bohr Model Visualizer</h2>
+                <div id="canvas-container">
+                    <canvas id="atom-canvas"></canvas>
+                </div>
             </section>
         </div>
 

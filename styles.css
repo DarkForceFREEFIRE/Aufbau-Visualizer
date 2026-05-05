@@ -52,7 +52,6 @@
     --control-fill: rgba(255, 255, 255, 0.06);
     --control-stroke: rgba(255, 255, 255, 0.09);
     --control-stroke-bottom: rgba(255, 255, 255, 0.09);
-    /* Flatter in dark mode */
     --control-hover: rgba(255, 255, 255, 0.08);
     --control-active: rgba(255, 255, 255, 0.03);
 
@@ -124,7 +123,8 @@ h2 {
 }
 
 .header-content {
-    max-width: 1280px;
+    max-width: 1920px;
+    width: 100%;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
@@ -146,13 +146,31 @@ h2 {
 
 /* --- Main Layout --- */
 .app-content {
-    max-width: 1280px;
+    max-width: 1920px;
+    width: 100%;
     margin: 0 auto;
     padding: 0 32px 32px 32px;
     display: grid;
-    grid-template-columns: 340px 1fr;
+    /* 3-Column setup! Utilizing max-screen width */
+    grid-template-columns: 340px 1fr auto;
     gap: 24px;
     flex-grow: 1;
+}
+
+/* --- Layout Responsiveness (Desktop to Mobile) --- */
+@media (max-width: 1400px) {
+    .app-content {
+        grid-template-columns: 340px 1fr;
+    }
+
+    .panel-right {
+        grid-column: 1 / -1;
+        /* Diagram pushes to full width below controls */
+    }
+
+    .atom-card {
+        min-height: 350px;
+    }
 }
 
 @media (max-width: 950px) {
@@ -170,10 +188,15 @@ h2 {
 }
 
 .panel-left,
+.panel-middle,
 .panel-right {
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+.panel-middle {
+    min-width: 300px;
 }
 
 /* --- Fluent Cards (Layering) --- */
@@ -193,6 +216,30 @@ h2 {
     align-items: center;
     min-height: 100%;
     overflow-x: auto;
+}
+
+/* --- Bohr Model Visualizer (NEW) --- */
+.atom-card {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    height: 100%;
+    min-height: 400px;
+}
+
+#canvas-container {
+    flex-grow: 1;
+    width: 100%;
+    position: relative;
+}
+
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
 /* --- Element Info --- */
@@ -585,15 +632,12 @@ h2 {
     text-align: center;
 }
 
-/* WinUI Input Focus State */
 .fluent-input:focus {
     border-bottom-color: var(--accent-default);
     border-bottom-width: 2px;
     padding-bottom: 3px;
-    /* Prevents text shifting */
 }
 
-/* Hide default browser up/down arrows for the number input */
 .fluent-input::-webkit-outer-spin-button,
 .fluent-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -618,7 +662,6 @@ h2 {
 
 .card-header-row .card-title {
     margin-bottom: 0;
-
 }
 
 .search-box {
@@ -629,23 +672,6 @@ h2 {
     z-index: 101;
 }
 
-/* Overriding the text-align center applied to the number input */
-.search-box .fluent-input {
-    width: 100%;
-    text-align: left;
-}
-
-.element-header,
-.slider-header,
-.slider-container,
-.button-group,
-.config-card,
-.config-text {
-    position: relative;
-    z-index: 1;
-}
-
-/* Overriding the text-align center applied to the number input */
 .search-box .fluent-input {
     width: 100%;
     text-align: left;
@@ -656,21 +682,14 @@ h2 {
     top: calc(100% + 4px);
     left: 0;
     right: 0;
-
-    /* Use the high-opacity variable we created */
     background: var(--dropdown-bg);
-
     border: 1px solid var(--card-border);
     border-radius: 8px;
-    /* The blur helps it feel premium, but the background color 
-       now does the heavy lifting of hiding text behind it */
     backdrop-filter: blur(20px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    /* Increased shadow for depth */
     max-height: 150px;
     overflow-y: auto;
     z-index: 999;
-    /* Extremely high to ensure it stays on top of the search-box */
     list-style: none;
     padding: 4px;
     margin: 0;
@@ -711,7 +730,6 @@ h2 {
     color: var(--text-primary);
 }
 
-/* WinUI thin scrollbar for the dropdown */
 .fluent-dropdown::-webkit-scrollbar {
     width: 4px;
 }
@@ -727,8 +745,6 @@ h2 {
 
 /* --- Mobile Responsiveness --- */
 @media (max-width: 480px) {
-
-    /* Stack header items for narrow screens */
     .header-content {
         flex-direction: column;
         align-items: flex-start;
@@ -748,7 +764,6 @@ h2 {
         padding: 16px;
     }
 
-    /* Shrink Element Info Header */
     .element-symbol {
         width: 48px;
         height: 48px;
@@ -765,7 +780,6 @@ h2 {
         font-size: 18px;
     }
 
-    /* Scale down the entire Grid Diagram to fit mobile screens */
     .diagram {
         grid-template-columns: 24px repeat(4, 60px);
         grid-template-rows: 24px repeat(7, 60px);

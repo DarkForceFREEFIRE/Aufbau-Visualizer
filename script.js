@@ -72,7 +72,7 @@ function getElementCategoryAndDescription(atomicNumber, name) {
     return `${name} is classified as ${category} belonging to the ${block}. It contains ${atomicNumber} protons and ${atomicNumber} electrons, following standard Aufbau sequencing.`;
 }
 
-// --- DOM Elements ---
+// --- DOM Elements & Global State ---
 const diagram = document.getElementById('diagram');
 const slider = document.getElementById('electron-slider');
 const configText = document.getElementById('config-text');
@@ -88,6 +88,8 @@ const searchInput = document.getElementById('element-search');
 const searchDropdown = document.getElementById('search-dropdown');
 
 let autoplayInterval;
+let currentShellCounts = [0, 0, 0, 0, 0, 0, 0];
+let currentSymbol = "--";
 
 // --- Initialize WinUI Theme ---
 function initTheme() {
@@ -102,6 +104,9 @@ function setTheme(isDark) {
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
     themeToggle.setAttribute('aria-checked', isDark);
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
+
+    // Update canvas visualizer colors to match the theme shortly after switch
+    setTimeout(updateCanvasColors, 50);
 }
 
 themeToggle.addEventListener('click', () => {
@@ -168,7 +173,7 @@ function updateConfig(source = 'system') {
     if (source !== 'manual_input') {
         numInput.value = count;
     }
-    // NEW: Clear search input when navigating via other methods
+    // Clear search input when navigating via other methods
     if (source !== 'search') {
         searchInput.value = '';
     }
@@ -179,6 +184,7 @@ function updateConfig(source = 'system') {
 
     // Update Element Information Display
     if (count === 0) {
+        currentSymbol = "--";
         elSymbol.innerText = "--";
         elName.innerText = "None Selected";
         elAtomic.innerText = `Atomic Number: 0`;
@@ -187,11 +193,15 @@ function updateConfig(source = 'system') {
     } else {
         const symbol = elementSymbols[count - 1];
         const name = elementNames[count - 1];
+        currentSymbol = symbol;
         elSymbol.innerText = symbol;
         elName.innerText = name;
         elAtomic.innerText = `Atomic Number: ${count}`;
         elDesc.innerText = getElementCategoryAndDescription(count, name);
     }
+
+    // Reset shell counts for canvas
+    currentShellCounts = [0, 0, 0, 0, 0, 0, 0];
 
     // Update Grid & Build Config String
     orbitals.forEach((orb) => {
@@ -202,6 +212,9 @@ function updateConfig(source = 'system') {
         if (remaining > 0) {
             let adding = Math.min(remaining, orb.max);
             remaining -= adding;
+
+            // Log shell additions for Atom visualizer (n=1 maps to index 0)
+            currentShellCounts[orb.n - 1] += adding;
 
             // Update box metrics
             countText.innerText = `${adding}/${orb.max}`;
@@ -225,6 +238,113 @@ function updateConfig(source = 'system') {
     if (count > 0) configText.innerHTML = configHTML;
 }
 
+// --- Canvas Atom Visualizer ---
+const canvas = document.getElementById('atom-canvas');
+const ctx = canvas ? canvas.getContext('2d') : null;
+let logicalWidth = 300;
+let logicalHeight = 300;
+
+let cachedColors = {
+    accent: '#005FB8',
+    text: '#000000',
+    ring: 'rgba(0,0,0,0.2)',
+    btnFg: '#FFFFFF'
+};
+
+function updateCanvasColors() {
+    const style = getComputedStyle(document.body);
+    cachedColors.accent = style.getPropertyValue('--accent-default').trim() || '#005FB8';
+    cachedColors.text = style.getPropertyValue('--text-primary').trim() || '#000';
+    cachedColors.ring = style.getPropertyValue('--text-tertiary').trim() || 'rgba(0,0,0,0.2)';
+    cachedColors.btnFg = style.getPropertyValue('--primary-btn-fg').trim() || '#FFF';
+}
+
+function resizeCanvas() {
+    const container = document.getElementById('canvas-container');
+    if (!container || !canvas) return;
+    const rect = container.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+
+    logicalWidth = rect.width;
+    logicalHeight = rect.height;
+
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+
+    ctx.scale(dpr, dpr);
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+}
+
+function drawAtom(time) {
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, logicalWidth, logicalHeight);
+    const cx = logicalWidth / 2;
+    const cy = logicalHeight / 2;
+
+    const maxR = Math.min(cx, cy) - 20;
+    const ringSpacing = maxR / 7;
+
+    // Draw Rings
+    ctx.lineWidth = 1;
+    for (let n = 1; n <= 7; n++) {
+        if (currentShellCounts[n - 1] > 0) {
+            ctx.beginPath();
+            ctx.arc(cx, cy, ringSpacing * n, 0, 2 * Math.PI);
+            ctx.strokeStyle = cachedColors.ring;
+            ctx.stroke();
+        }
+    }
+
+    // Draw Electrons
+    for (let n = 1; n <= 7; n++) {
+        const count = currentShellCounts[n - 1];
+        if (count > 0) {
+            const r = ringSpacing * n;
+            // Inner rings orbit slightly faster
+            const speed = 0.0008 / n;
+            for (let i = 0; i < count; i++) {
+                const angle = (time * speed) + ((Math.PI * 2) / count) * i;
+                const x = cx + Math.cos(angle) * r;
+                const y = cy + Math.sin(angle) * r;
+
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                ctx.fillStyle = cachedColors.accent;
+                ctx.fill();
+
+                // Outline electron
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = cachedColors.btnFg;
+                ctx.stroke();
+            }
+        }
+    }
+
+    // Draw Nucleus
+    if (currentSymbol !== "--") {
+        ctx.beginPath();
+        ctx.arc(cx, cy, 18, 0, 2 * Math.PI);
+        ctx.fillStyle = cachedColors.accent;
+        ctx.fill();
+
+        ctx.fillStyle = cachedColors.btnFg;
+        ctx.font = 'bold 14px "Segoe UI Variable Text", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(currentSymbol, cx, cy + 1);
+    } else {
+        // Empty State
+        ctx.beginPath();
+        ctx.arc(cx, cy, 18, 0, 2 * Math.PI);
+        ctx.fillStyle = cachedColors.ring;
+        ctx.fill();
+    }
+
+    requestAnimationFrame(drawAtom);
+}
+
 // --- Interactivity ---
 function pauseAutoPlay() {
     clearInterval(autoplayInterval);
@@ -237,13 +357,10 @@ slider.addEventListener('input', () => {
     updateConfig('slider');
 });
 
-// NEW: Manual Number Input Logic
 numInput.addEventListener('input', (e) => {
     if (autoplayInterval) pauseAutoPlay();
 
     let rawValue = e.target.value;
-
-    // Clear diagram if input is emptied
     if (rawValue === '') {
         slider.value = 0;
         updateConfig('manual_input');
@@ -253,19 +370,15 @@ numInput.addEventListener('input', (e) => {
     let val = parseInt(rawValue, 10);
     if (isNaN(val)) return;
 
-    // Clamp values between 0 and 118
     let clampedVal = Math.min(Math.max(val, 0), 118);
     slider.value = clampedVal;
 
-    // Force UI input update if user types invalid number (e.g., 200 corrects to 118 immediately)
     if (val !== clampedVal) {
         numInput.value = clampedVal;
     }
-
     updateConfig('manual_input');
 });
 
-// NEW: Prevent empty field on unfocus
 numInput.addEventListener('blur', () => {
     if (numInput.value === '') {
         numInput.value = slider.value;
@@ -298,8 +411,12 @@ btnPlay.addEventListener('click', () => {
 });
 
 // --- Custom Search Logic ---
+function populateSearchData() {
+    // Kept here in case you need initial indexation map
+}
+
 function renderDropdown(query) {
-    searchDropdown.innerHTML = ''; // Clear previous results
+    searchDropdown.innerHTML = '';
 
     if (!query) {
         searchDropdown.classList.add('hidden');
@@ -309,7 +426,6 @@ function renderDropdown(query) {
     const lowerQuery = query.toLowerCase();
     const matches = [];
 
-    // Filter elements that match the typed query (by name or symbol)
     for (let i = 0; i < elementNames.length; i++) {
         if (elementNames[i].toLowerCase().includes(lowerQuery) ||
             elementSymbols[i].toLowerCase().includes(lowerQuery)) {
@@ -318,14 +434,12 @@ function renderDropdown(query) {
     }
 
     if (matches.length === 0) {
-        // Show "No results"
         const noResult = document.createElement('li');
         noResult.className = 'dropdown-item';
-        noResult.style.pointerEvents = 'none'; // Make unclickable
+        noResult.style.pointerEvents = 'none';
         noResult.innerHTML = `<span class="dropdown-name" style="color: var(--text-tertiary)">No results found</span>`;
         searchDropdown.appendChild(noResult);
     } else {
-        // Render valid results
         matches.forEach(match => {
             const li = document.createElement('li');
             li.className = 'dropdown-item';
@@ -334,7 +448,6 @@ function renderDropdown(query) {
                 <span class="dropdown-name">${match.name}</span>
             `;
 
-            // Handle clicking an option
             li.addEventListener('click', () => {
                 selectElementFromSearch(match.index);
             });
@@ -349,37 +462,33 @@ function renderDropdown(query) {
 function selectElementFromSearch(index) {
     if (autoplayInterval) pauseAutoPlay();
     slider.value = index + 1;
-    searchInput.value = elementNames[index]; // Fill input with nicely formatted name
+    searchInput.value = elementNames[index];
     searchDropdown.classList.add('hidden');
     updateConfig('search');
 }
 
-// 1. Listen for typing in the search box
 searchInput.addEventListener('input', (e) => {
     renderDropdown(e.target.value.trim());
 });
 
-// 2. Hide dropdown when clicking outside of it
 document.addEventListener('click', (e) => {
     if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
         searchDropdown.classList.add('hidden');
     }
 });
 
-// 3. Allow pressing "Enter" to automatically pick the top result
 searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         e.preventDefault();
         const visibleItems = searchDropdown.querySelectorAll('.dropdown-item:not([style*="pointer-events: none"])');
 
         if (!searchDropdown.classList.contains('hidden') && visibleItems.length > 0) {
-            // Grab the symbol from the first result in the dropdown and find its index
             const firstMatchSymbol = visibleItems[0].querySelector('.dropdown-symbol').innerText;
             const index = elementSymbols.indexOf(firstMatchSymbol);
 
             if (index !== -1) {
                 selectElementFromSearch(index);
-                searchInput.blur(); // Hide mobile keyboard
+                searchInput.blur();
             }
         }
     }
@@ -388,5 +497,13 @@ searchInput.addEventListener('keydown', (e) => {
 // --- Startup ---
 initTheme();
 buildGrid();
-populateSearchData();
+updateCanvasColors();
 updateConfig('startup');
+
+// Setup Canvas Observers
+const canvasContainer = document.getElementById('canvas-container');
+if (canvasContainer) {
+    const resizeObserver = new ResizeObserver(resizeCanvas);
+    resizeObserver.observe(canvasContainer);
+    requestAnimationFrame(drawAtom);
+}
